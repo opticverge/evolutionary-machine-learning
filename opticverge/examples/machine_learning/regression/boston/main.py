@@ -2,7 +2,8 @@ from opticverge.core.enum.policy import Policy
 from opticverge.core.log.logger import application_logger
 from opticverge.core.solver.generic_ais import AIS
 from opticverge.examples.machine_learning.regression.boston.problem import BostonHousingProblem
-from opticverge.external.scikit.chromosome.regression.ensemble import GradientBoostingRegressorChromosome
+from opticverge.external.scikit.chromosome.regression.ensemble import GradientBoostingRegressorChromosome, \
+    XGBRegressorChromosome
 from opticverge.external.scikit.enum.normaliser import Normaliser
 from opticverge.external.scikit.enum.scoring_function import Scoring
 
@@ -16,7 +17,7 @@ def run():
         )
 
         solver = AIS(
-            chromosome=GradientBoostingRegressorChromosome(),
+            chromosome=XGBRegressorChromosome(),
             problem=problem,
             population_size=10,
             epochs=2,

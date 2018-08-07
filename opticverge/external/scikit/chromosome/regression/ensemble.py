@@ -2,6 +2,7 @@ from collections import OrderedDict
 
 import numpy as np
 from sklearn.ensemble import GradientBoostingRegressor
+from xgboost import XGBRegressor
 
 from opticverge.core.chromosome.class_chromosome import ClassChromosome
 from opticverge.core.chromosome.distribution.bool_distribution_chromosome import RandUniformBooleanChromosome
@@ -78,6 +79,65 @@ class GradientBoostingRegressorChromosome(ClassChromosome):
                 max_val=0.99,
                 rounding=2,
                 output_dtype=np.float64
+            ),
+            "random_state": RandPoissonChromosome(
+                value=rand_int(1, INT32_MAX),
+                min_val=1,
+                max_val=INT32_MAX,
+                rounding=None,
+                output_dtype=int
+            )
+        })
+
+
+class XGBRegressorChromosome(ClassChromosome):
+    def __init__(self):
+        super(XGBRegressorChromosome, self).__init__(
+            XGBRegressor,
+            self.blueprint_factory()
+        )
+
+    def blueprint_factory(self):
+        return OrderedDict({
+            "max_depth": RandPoissonChromosome(
+                value=rand_int(2, 16),
+                min_val=2,
+                max_val=None,
+                rounding=None,
+                output_dtype=int
+            ),
+            "learning_rate": RandGaussChromosome(
+                value=0.1,
+                min_val=0.01,
+                max_val=0.99,
+                rounding=2
+            ),
+            "n_estimators": RandPoissonChromosome(
+                value=rand_int(2, 128),
+                min_val=2,
+                max_val=None,
+                output_dtype=int
+            ),
+            "objective": RandOptionsChromosome(
+                options=[
+                    "reg:linear",
+                    "reg:gamma",
+                    "reg:tweedie"
+
+                ]
+            ),
+            "booster": RandOptionsChromosome(
+                options=[
+                    "gbtree",
+                    "gblinear",
+                    "dart"
+                ]
+            ),
+            "base_score": RandGaussChromosome(
+                value=0.5,
+                min_val=0.01,
+                max_val=0.99,
+                rounding=3
             ),
             "random_state": RandPoissonChromosome(
                 value=rand_int(1, INT32_MAX),
