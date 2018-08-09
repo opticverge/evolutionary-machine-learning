@@ -170,8 +170,6 @@ class AbstractSolver(metaclass=ABCMeta):
 
         chromosome.generate()
 
-        # TODO: Add policy handling
-
         return chromosome
 
     def generate_chromosomes(self, count: int = 100) -> List[AbstractChromosome]:
@@ -187,16 +185,17 @@ class AbstractSolver(metaclass=ABCMeta):
         generated_count: int = 0
 
         while generated_count < count:
+
             chromosome: AbstractChromosome = self.generate_chromosome()
 
             id: int = generated_count
 
-            # TODO: has policy check
+            if Policy.EnforceUniqueChromosome in self.policies:
 
-            # if True:
-            #     id = chromosome.meta.id
-            #     if id in chromosomes:
-            #         continue
+                id = chromosome.id
+
+                if id in chromosomes or id in self.meta.chromosome_tracker:
+                    continue
 
             chromosomes[id] = chromosome
 
