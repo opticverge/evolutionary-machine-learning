@@ -18,6 +18,16 @@ def run():
             folds=2
         )
 
+        """
+        Regressor choices:
+        - AdaBoostRegressorChromosome
+        - DecisionTreeRegressorChromosome
+        - GradientBoostingRegressorChromosome
+        - KNeighborsRegressorChromosome
+        - MLPRegressorChromosome
+        - RandomForestRegressorChromosome
+        - XGBRegressorChromosome
+        """
         solver = AIS(
             chromosome=AdaBoostRegressorChromosome(),
             problem=problem,

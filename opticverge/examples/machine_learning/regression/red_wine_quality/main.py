@@ -15,9 +15,19 @@ def run():
         problem = RedWineQualityPredictionProblem(
             scoring_function=Scoring.MeanAbsoluteError,
             normaliser=Normaliser.RobustScaler,
-            folds=4
+            folds=3
         )
 
+        """
+        Regressor choices:
+        - AdaBoostRegressorChromosome
+        - DecisionTreeRegressorChromosome
+        - GradientBoostingRegressorChromosome
+        - KNeighborsRegressorChromosome
+        - MLPRegressorChromosome
+        - RandomForestRegressorChromosome
+        - XGBRegressorChromosome
+        """
         solver = AIS(
             chromosome=XGBRegressorChromosome(),
             problem=problem,
