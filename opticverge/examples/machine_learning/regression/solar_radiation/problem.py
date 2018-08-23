@@ -21,7 +21,7 @@ class SolarRadiationPredictionProblem(AbstractRegressionProblem):
         ])
 
         data = np.array(df[["Temperature", "Pressure", "Humidity", "WindDirection(Degrees)", "Speed"]])
-        target = np.ndarray.flatten(np.array(df[["Radiation"]]))
+        target = np.array(df["Radiation"])
 
         super(SolarRadiationPredictionProblem, self).__init__(
             Objective.Minimisation,

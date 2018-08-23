@@ -24,9 +24,8 @@ class ForestFiresPredictionProblem(AbstractRegressionProblem):
             data.append(row.values[:-1])
             target.append(row.values[-1])
 
-        #
-        data = np.array(data)
-        target = np.array(target)
+        data = np.array(df[["X", "Y", "FFMC", "DMC", "DC", "ISI", "temp", "RH", "wind", "rain"]])
+        target = np.array(df["area"])
 
         super(ForestFiresPredictionProblem, self).__init__(
             Objective.Minimisation,

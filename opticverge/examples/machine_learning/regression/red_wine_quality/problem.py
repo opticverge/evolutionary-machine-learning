@@ -16,18 +16,14 @@ from opticverge.external.scikit.problem.abstract_regression_problem import Abstr
 class RedWineQualityPredictionProblem(AbstractRegressionProblem):
     def __init__(self, scoring_function: Scoring, normaliser: Normaliser = None, folds: int = 1):
 
-        data = []
-        target = []
+        df = pandas.read_csv("./winequality-red.csv", sep=";", usecols=[
+            "fixed acidity", "volatile acidity", "citric acid", "residual sugar", "chlorides", "free sulfur dioxide",
+            "total sulfur dioxide", "density", "pH", "sulphates", "alcohol", "quality"
+        ])
 
-        df = pandas.read_csv("./winequality-red.csv", sep=";")
-
-        for i, row in df.iterrows():
-            data.append(row.values[:-1])
-            target.append(row.values[-1])
-
-        #
-        data = np.array(data)
-        target = np.array(target)
+        data = np.array(df[["fixed acidity", "volatile acidity", "citric acid", "residual sugar", "chlorides", "free sulfur dioxide",
+            "total sulfur dioxide", "density", "pH", "sulphates", "alcohol"]])
+        target = np.array(df["quality"])
 
         super(RedWineQualityPredictionProblem, self).__init__(
             Objective.Minimisation,
