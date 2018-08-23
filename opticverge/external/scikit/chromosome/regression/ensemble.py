@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 import numpy as np
 import psutil
-from sklearn.ensemble import GradientBoostingRegressor, AdaBoostRegressor, RandomForestRegressor
+from sklearn.ensemble import GradientBoostingRegressor, AdaBoostRegressor, RandomForestRegressor, BaggingRegressor
 from xgboost import XGBRegressor
 
 from opticverge.core.chromosome.class_chromosome import ClassChromosome
@@ -258,6 +258,47 @@ class RandomForestRegressorChromosome(ClassChromosome):
             ),
             "warm_start": RandUniformBooleanChromosome(),
             "bootstrap": RandUniformBooleanChromosome(),
+            "random_state": RandPoissonChromosome(
+                value=rand_int(1, INT32_MAX),
+                min_val=1,
+                max_val=INT32_MAX,
+                rounding=None,
+                output_dtype=int
+            )
+        })
+
+
+class BaggingRegressorChromosome(ClassChromosome):
+    def __init__(self, regressor_chromosome=None, n_estimators: int = None, ):
+        super(BaggingRegressorChromosome, self).__init__(
+            BaggingRegressor,
+            self.blueprint_factory(regressor_chromosome, n_estimators),
+            OrderedDict({
+                "n_jobs": psutil.cpu_count()
+            })
+        )
+
+    def blueprint_factory(self, regressor_chromosome=None, n_estimators: int = None, ):
+        return OrderedDict({
+            "base_estimator": regressor_chromosome if regressor_chromosome is not None else DecisionTreeRegressorChromosome(),
+            "n_estimators": RandPoissonChromosome(
+                value=n_estimators if n_estimators is not None else 50,
+                min_val=2,
+                max_val=None,
+                output_dtype=int
+            ),
+            "max_samples": RandGaussChromosome(
+                value=rand_real(),
+                min_val=0.1,
+                max_val=1.,
+
+            ),
+            "max_features": RandGaussChromosome(
+                value=rand_real(),
+                min_val=0.1,
+                max_val=1.0
+            ),
+            "warm_start": RandUniformBooleanChromosome(),
             "random_state": RandPoissonChromosome(
                 value=rand_int(1, INT32_MAX),
                 min_val=1,
