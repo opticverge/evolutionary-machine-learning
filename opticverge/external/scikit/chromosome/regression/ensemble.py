@@ -12,7 +12,7 @@ from opticverge.core.chromosome.distribution.real_distribution_chromosome import
 from opticverge.core.chromosome.options_chromosome import RandOptionsChromosome
 from opticverge.core.generator.int_distribution_generator import rand_int
 from opticverge.core.generator.real_generator import rand_real
-from opticverge.core.globals import INT32_MAX
+from opticverge.core.globals import INT32_MAX, DEFAULT_NUM_JOBS
 from opticverge.external.scikit.chromosome.regression.tree import DecisionTreeRegressorChromosome
 
 
@@ -111,7 +111,7 @@ class XGBRegressorChromosome(ClassChromosome):
                 n_estimators=n_estimators
             ),
             OrderedDict({
-                "n_jobs": num_jobs if num_jobs is not None else psutil.cpu_count()
+                "n_jobs": num_jobs if num_jobs is not None else DEFAULT_NUM_JOBS
             })
         )
 
@@ -225,7 +225,7 @@ class RandomForestRegressorChromosome(ClassChromosome):
             RandomForestRegressor,
             self.genotype_factory(max_depth, n_estimators),
             OrderedDict({
-                "n_jobs": num_jobs if num_jobs is not None else int(psutil.cpu_count(logical=True) / 2)
+                "n_jobs": num_jobs if num_jobs is not None else DEFAULT_NUM_JOBS
             })
         )
 
@@ -269,12 +269,12 @@ class RandomForestRegressorChromosome(ClassChromosome):
 
 
 class BaggingRegressorChromosome(ClassChromosome):
-    def __init__(self, regressor_chromosome=None, n_estimators: int = None, ):
+    def __init__(self, regressor_chromosome=None, n_estimators: int = None, num_jobs=None):
         super(BaggingRegressorChromosome, self).__init__(
             BaggingRegressor,
             self.blueprint_factory(regressor_chromosome, n_estimators),
             OrderedDict({
-                "n_jobs": psutil.cpu_count()
+                "n_jobs": num_jobs if num_jobs is not None else DEFAULT_NUM_JOBS
             })
         )
 

@@ -7,16 +7,17 @@ from opticverge.core.chromosome.class_chromosome import ClassChromosome
 from opticverge.core.chromosome.distribution.int_distribution_chromosome import RandPoissonChromosome
 from opticverge.core.chromosome.options_chromosome import RandOptionsChromosome
 from opticverge.core.generator.int_distribution_generator import rand_int
+from opticverge.core.globals import DEFAULT_NUM_JOBS
 
 
 class KNeighborsRegressorChromosome(ClassChromosome):
-    def __init__(self):
+    def __init__(self, num_jobs=None):
 
         super(KNeighborsRegressorChromosome, self).__init__(
             KNeighborsRegressor,
             self.blueprint_factory(),
             OrderedDict({
-                "n_jobs": psutil.cpu_count()
+                "n_jobs": num_jobs if num_jobs is not None else DEFAULT_NUM_JOBS
             })
         )
 

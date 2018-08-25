@@ -8,6 +8,7 @@ import psutil
 from sklearn.model_selection import train_test_split, KFold
 
 from opticverge.core.chromosome.abstract_chromosome import AbstractChromosome
+from opticverge.core.globals import DEFAULT_NUM_JOBS
 from opticverge.core.log.logger import application_logger
 from opticverge.core.problem.abstract_problem import AbstractProblem
 from opticverge.core.enum.objective import Objective
@@ -84,7 +85,7 @@ class AbstractRegressionProblem(AbstractProblem, metaclass=ABCMeta):
 
         try:
 
-            with concurrent.futures.ProcessPoolExecutor(max_workers=psutil.cpu_count(logical=True)) as executor:
+            with concurrent.futures.ProcessPoolExecutor(max_workers=DEFAULT_NUM_JOBS) as executor:
 
                 futures = []
 
