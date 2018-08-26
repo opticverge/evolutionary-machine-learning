@@ -51,10 +51,10 @@ class AbstractRegressionProblem(AbstractProblem, metaclass=ABCMeta):
 
             if self.__normaliser_enum is not None:
 
-                normaliser = Normaliser.get_normaliser(self.__normaliser_enum, **kwargs)
-                self.__normalised_data = normaliser.fit_transform(self.__data_x, self.target_x)
+                normaliser: Callable = Normaliser.get_normaliser(self.__normaliser_enum, **kwargs)
+                self.__normalised_data = normaliser.fit_transform(self.__data_x, self.__target_x)
 
-            return self.__normalised_data
+        return self.__normalised_data
 
     @property
     def partitions(self, dtype=np.float64, test_size=0.1):
@@ -63,23 +63,24 @@ class AbstractRegressionProblem(AbstractProblem, metaclass=ABCMeta):
 
             self.__partitioned_data = []
 
-            data_x = self.__data_x
+            data_x = self.data
+            target_x = self.__target_x
 
             if self.__folds < 2 or self.__folds is None:
 
-                x_train, x_test, y_train, y_test = train_test_split(data_x, self.__target_x, test_size=test_size)
+                x_train, x_test, y_train, y_test = train_test_split(data_x, target_x, test_size=test_size)
                 self.__partitioned_data.append(data_object(x_train, y_train, x_test, y_test, dtype))
             else:
                 validation_strategy = KFold(n_splits=self.__folds, shuffle=True)
-                cv_split = validation_strategy.split(data_x, self.__target_x)
+                cv_split = validation_strategy.split(data_x, target_x)
                 for train_index, test_index in cv_split:
                     x_train, x_test = data_x[train_index], data_x[test_index]
-                    y_train, y_test = self.__target_x[train_index], self.__target_x[test_index]
+                    y_train, y_test = target_x[train_index], target_x[test_index]
                     self.__partitioned_data.append(data_object(x_train, y_train, x_test, y_test, dtype))
 
         return self.__partitioned_data
 
-    def objective_function(self, chromosome: AbstractChromosome):
+    def objective_function(self, chromosome: AbstractChromosome) -> List[np.float64] or None:
 
         scores = None
 
@@ -108,7 +109,15 @@ class AbstractRegressionProblem(AbstractProblem, metaclass=ABCMeta):
                 exc_info=ex
             )
 
+        # ensures chromosome is not evaluated more than once
+        chromosome.meta.evaluated = True
+
+        # by default uses the average of the the scores from k-fold validation
         chromosome.fitness = None if scores is None else np.mean(scores)
+
+        # provides the result of cross validation allowing the caller to decide
+        # what they want to do after the evaluation
+        return scores
 
     def log_chromosome(self, chromosome: AbstractChromosome, solver: AbstractSolver, additional_data: Dict[str, Any] = None, separator="|"):
 
