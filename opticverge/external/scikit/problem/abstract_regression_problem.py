@@ -45,13 +45,24 @@ class AbstractRegressionProblem(AbstractProblem, metaclass=ABCMeta):
     @property
     def data(self, **kwargs):
 
+        # if the data has not already been normalised then apply normalisation
+        # strategy
         if self.__normalised_data is None:
+
+            # apply the ratio of training to the number of items in the data
             training_data_size = int(self.__train_test_ratio * len(self.__data_x))
+
+            # initially assign the non-normalised data
             self.__normalised_data = self.__data_x[:training_data_size]
 
+            # if the user has decided to use one of the normalisation strategies
+            # then apply it
             if self.__normaliser_enum is not None:
 
+                # lookup callable normaliser from scikit learn library
                 normaliser: Callable = Normaliser.get_normaliser(self.__normaliser_enum, **kwargs)
+
+                # transform the data and assign it to the normalised data
                 self.__normalised_data = normaliser.fit_transform(self.__data_x, self.__target_x)
 
         return self.__normalised_data
@@ -59,19 +70,27 @@ class AbstractRegressionProblem(AbstractProblem, metaclass=ABCMeta):
     @property
     def partitions(self, dtype=np.float64, test_size=0.1):
 
+        # if we haven't already partitioned the data then do so
         if self.__partitioned_data is None:
 
             self.__partitioned_data = []
 
+            # get the normalised data and its target variables
             data_x = self.data
             target_x = self.__target_x
 
+            # if the user prefers not to use a validation strategy then split
+            # the data into a single fold.
             if self.__folds < 2 or self.__folds is None:
-
                 x_train, x_test, y_train, y_test = train_test_split(data_x, target_x, test_size=test_size)
                 self.__partitioned_data.append(data_object(x_train, y_train, x_test, y_test, dtype))
             else:
+                # use the default KFold validation strategy
+                # TODO: expose alternative folding strategies
                 validation_strategy = KFold(n_splits=self.__folds, shuffle=True)
+
+                # split the data and build the partitions to match the number
+                # of folds
                 cv_split = validation_strategy.split(data_x, target_x)
                 for train_index, test_index in cv_split:
                     x_train, x_test = data_x[train_index], data_x[test_index]
@@ -82,25 +101,40 @@ class AbstractRegressionProblem(AbstractProblem, metaclass=ABCMeta):
 
     def objective_function(self, chromosome: AbstractChromosome) -> List[np.float64] or None:
 
+        # by default the scores are set to None given that an exception could
+        # occur during the learning phase
         scores = None
 
         try:
 
+            # we prefer to farm out the learning to the number of cores assigned
+            # in DEFAULT_NUM_JOBS
             with concurrent.futures.ProcessPoolExecutor(max_workers=DEFAULT_NUM_JOBS) as executor:
 
+                # here we track the result of the training against the learners
                 futures = []
 
                 for i, partition in enumerate(self.partitions):
 
-                    future = executor.submit(learn,
-                                             learner=chromosome.phenotype,
-                                             partition=partition,
-                                             evaluation_function=self.__scoring_function)
+                    # The phenotype of the chromosome represents an instance of
+                    # a learner that implements the fit function. The learn
+                    # function is not a part of this class simply because we
+                    # do not want to serialize the entire class in order to
+                    # call the method
+                    future = executor.submit(
+                        learn,
+                        learner=chromosome.phenotype,
+                        partition=partition,
+                        evaluation_function=self.__scoring_function
+                    )
 
+                    # add the futures
                     futures.insert(i, future)
 
+                # wait until the futures are complete
                 concurrent.futures.wait(futures)
 
+                # extract the output of each future into a list
                 scores = [future.result() for future in futures]
 
         except Exception as ex:
@@ -109,11 +143,11 @@ class AbstractRegressionProblem(AbstractProblem, metaclass=ABCMeta):
                 exc_info=ex
             )
 
-        # ensures chromosome is not evaluated more than once
-        chromosome.meta.evaluated = True
-
         # by default uses the average of the the scores from k-fold validation
         chromosome.fitness = None if scores is None else np.mean(scores)
+
+        # call the base class objective function
+        super(AbstractRegressionProblem, self).objective_function(chromosome)
 
         # provides the result of cross validation allowing the caller to decide
         # what they want to do after the evaluation

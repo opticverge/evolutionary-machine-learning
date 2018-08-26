@@ -38,3 +38,5 @@ class AckleyProblem(AbstractProblem):
 
         chromosome.fitness = np.abs(
             -a * np.exp(-b * np.sqrt(1 / d * sum_squared)) - np.exp(1 / d * sum_cos) + a + np.exp(1))
+
+        super(AckleyProblem, self).objective_function(chromosome)

@@ -33,3 +33,4 @@ class RastriginProblem(AbstractProblem):
             formula_sum += np.square(val) - (10 * np.cos(2 * np.pi * val))
 
         chromosome.fitness = np.abs((10 * d) + formula_sum)
+        super(RastriginProblem, self).objective_function(chromosome)
