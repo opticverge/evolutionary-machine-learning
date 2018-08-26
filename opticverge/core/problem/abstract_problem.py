@@ -46,9 +46,7 @@ class AbstractProblem(metaclass=ABCMeta):
         
         Args:
             chromosome (AbstractChromosome): The chromosome to measure
-        
-        Raises:
-            NotImplementedError: Must be implemented by the derived class
+
         """
         chromosome.meta.evaluated = True
 
