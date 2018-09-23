@@ -168,6 +168,8 @@ class AbstractSolver(metaclass=ABCMeta):
 
         chromosome: AbstractChromosome = copy.deepcopy(self.__chromosome)
 
+        chromosome.generate_genotype()
+
         chromosome.generate()
 
         return chromosome

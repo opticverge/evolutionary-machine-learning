@@ -16,7 +16,10 @@ class MLPRegressorChromosome(ClassChromosome):
     def __init__(self, layers: int = 6, min_layers: int = 2, max_layers=512):
         super(MLPRegressorChromosome, self).__init__(
             MLPRegressor,
-            self.genotype_factory(layers, min_layers, max_layers)
+            self.genotype_factory(layers, min_layers, max_layers),
+            OrderedDict({
+                "random_state": rand_int(1, INT32_MAX)
+            })
         )
 
     def genotype_factory(self, layers: int = 6, min_layers: int = 2, max_layers=512):
@@ -54,13 +57,6 @@ class MLPRegressorChromosome(ClassChromosome):
                 ]
             ),
             "shuffle": RandUniformBooleanChromosome(),
-            "random_state": RandPoissonChromosome(
-                value=rand_int(1, INT32_MAX),
-                min_val=1,
-                max_val=INT32_MAX,
-                rounding=None,
-                output_dtype=int
-            ),
             "warm_start": RandUniformBooleanChromosome(),
             "max_iter": RandOptionsChromosome(
                 options=[

@@ -13,7 +13,10 @@ class DecisionTreeRegressorChromosome(ClassChromosome):
     def __init__(self, max_depth: int = None):
         super(DecisionTreeRegressorChromosome, self).__init__(
             DecisionTreeRegressor,
-            self.genotype_factory(max_depth)
+            self.genotype_factory(max_depth),
+            OrderedDict({
+                "random_state": rand_int(1, INT32_MAX)
+            })
         )
 
     def genotype_factory(self, max_depth: int = None):
@@ -44,12 +47,5 @@ class DecisionTreeRegressorChromosome(ClassChromosome):
                     "sqrt",
                     "log2"
                 ]
-            ),
-            "random_state": RandPoissonChromosome(
-                value=rand_int(1, INT32_MAX),
-                min_val=1,
-                max_val=INT32_MAX,
-                rounding=None,
-                output_dtype=int
             )
         })

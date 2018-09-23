@@ -15,13 +15,13 @@ class KNeighborsRegressorChromosome(ClassChromosome):
 
         super(KNeighborsRegressorChromosome, self).__init__(
             KNeighborsRegressor,
-            self.blueprint_factory(),
+            self.genotype_factory(),
             OrderedDict({
                 "n_jobs": num_jobs if num_jobs is not None else DEFAULT_NUM_JOBS
             })
         )
 
-    def blueprint_factory(self):
+    def genotype_factory(self):
         return OrderedDict({
             "n_neighbors" : RandPoissonChromosome(
                 value=4,

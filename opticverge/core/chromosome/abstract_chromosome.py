@@ -176,5 +176,8 @@ class AbstractChromosome(metaclass=ABCMeta):
 
         return self.__genotype
 
-    def blueprint_factory(self, **kwargs) -> Dict[str, AbstractChromosomeEntity]:
+    def genotype_factory(self, **kwargs) -> Dict[str, AbstractChromosomeEntity]:
         return OrderedDict({})
+
+    def generate_genotype(self):
+        self.__blueprint = self.genotype_factory()

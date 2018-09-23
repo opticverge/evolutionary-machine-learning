@@ -30,14 +30,13 @@ class GradientBoostingRegressorChromosome(ClassChromosome):
         """
         super(GradientBoostingRegressorChromosome, self).__init__(
             GradientBoostingRegressor,
-            self.blueprint_factory(n_estimators, learning_rate, max_depth)
+            self.genotype_factory(n_estimators, learning_rate, max_depth),
+            OrderedDict({
+                "random_state": rand_int(1, INT32_MAX)
+            })
         )
 
-    def blueprint_factory(self,
-                          n_estimators: int = None,
-                          learning_rate: float = None,
-                          max_depth: int = None,
-                          alpha: float = None):
+    def genotype_factory(self, n_estimators: int = None, learning_rate: float = None, max_depth: int = None, alpha: float = None):
         return OrderedDict({
             "n_estimators": RandPoissonChromosome(
                 value=n_estimators if n_estimators is not None else 128,
@@ -86,39 +85,22 @@ class GradientBoostingRegressorChromosome(ClassChromosome):
                 max_val=0.99,
                 rounding=2,
                 output_dtype=np.float64
-            ),
-            "random_state": RandPoissonChromosome(
-                value=rand_int(1, INT32_MAX),
-                min_val=1,
-                max_val=INT32_MAX,
-                rounding=None,
-                output_dtype=int
             )
         })
 
 
 class XGBRegressorChromosome(ClassChromosome):
-    def __init__(self,
-                 max_depth: int = None,
-                 learning_rate: float = None,
-                 n_estimators: int = None,
-                 num_jobs: int = None):
+    def __init__(self, max_depth: int = None, learning_rate: float = None, n_estimators: int = None, num_jobs: int = None):
         super(XGBRegressorChromosome, self).__init__(
             XGBRegressor,
-            self.blueprint_factory(
-                max_depth=max_depth,
-                learning_rate=learning_rate,
-                n_estimators=n_estimators
-            ),
+            self.genotype_factory(max_depth=max_depth, learning_rate=learning_rate, n_estimators=n_estimators),
             OrderedDict({
-                "n_jobs": num_jobs if num_jobs is not None else DEFAULT_NUM_JOBS
+                "n_jobs": num_jobs if num_jobs is not None else DEFAULT_NUM_JOBS,
+                "random_state": rand_int(1, INT32_MAX)
             })
         )
 
-    def blueprint_factory(self,
-                          max_depth: int = None,
-                          learning_rate: float = None,
-                          n_estimators: int = None):
+    def genotype_factory(self, max_depth: int = None, learning_rate: float = None, n_estimators: int = None):
         return OrderedDict({
             "max_depth": RandPoissonChromosome(
                 value=max_depth if max_depth is not None else rand_int(2, 16),
@@ -160,13 +142,6 @@ class XGBRegressorChromosome(ClassChromosome):
                 max_val=0.99,
                 rounding=3
             ),
-            "random_state": RandPoissonChromosome(
-                value=rand_int(1, INT32_MAX),
-                min_val=1,
-                max_val=INT32_MAX,
-                rounding=None,
-                output_dtype=int
-            ),
             "gamma": RandGaussChromosome(
                 value=rand_real(),
                 min_val=0.01,
@@ -180,13 +155,13 @@ class AdaBoostRegressorChromosome(ClassChromosome):
     def __init__(self, n_estimators: int = None, learning_rate: float = None, regressor_chromosome=None):
         super(AdaBoostRegressorChromosome, self).__init__(
             AdaBoostRegressor,
-            self.genotype_factory(n_estimators, learning_rate, regressor_chromosome)
+            self.genotype_factory(n_estimators, learning_rate, regressor_chromosome),
+            OrderedDict({
+                "random_state": rand_int(1, INT32_MAX)
+            })
         )
 
-    def genotype_factory(self,
-                         n_estimators: int = None,
-                         learning_rate: float = None,
-                         regressor_chromosome=None):
+    def genotype_factory(self, n_estimators: int = None, learning_rate: float = None, regressor_chromosome=None):
         return OrderedDict({
             "base_estimator": regressor_chromosome if regressor_chromosome is not None else DecisionTreeRegressorChromosome(),
             "n_estimators": RandPoissonChromosome(
@@ -208,13 +183,6 @@ class AdaBoostRegressorChromosome(ClassChromosome):
                     "square",
                     "exponential"
                 ]
-            ),
-            "random_state": RandPoissonChromosome(
-                value=rand_int(1, INT32_MAX),
-                min_val=1,
-                max_val=INT32_MAX,
-                rounding=None,
-                output_dtype=int
             )
         })
 
@@ -225,7 +193,8 @@ class RandomForestRegressorChromosome(ClassChromosome):
             RandomForestRegressor,
             self.genotype_factory(max_depth, n_estimators),
             OrderedDict({
-                "n_jobs": num_jobs if num_jobs is not None else DEFAULT_NUM_JOBS
+                "n_jobs": num_jobs if num_jobs is not None else DEFAULT_NUM_JOBS,
+                "random_state": rand_int(1, INT32_MAX)
             })
         )
 
@@ -257,14 +226,7 @@ class RandomForestRegressorChromosome(ClassChromosome):
                 ]
             ),
             "warm_start": RandUniformBooleanChromosome(),
-            "bootstrap": RandUniformBooleanChromosome(),
-            "random_state": RandPoissonChromosome(
-                value=rand_int(1, INT32_MAX),
-                min_val=1,
-                max_val=INT32_MAX,
-                rounding=None,
-                output_dtype=int
-            )
+            "bootstrap": RandUniformBooleanChromosome()
         })
 
 
@@ -272,13 +234,14 @@ class BaggingRegressorChromosome(ClassChromosome):
     def __init__(self, regressor_chromosome=None, n_estimators: int = None, num_jobs=None):
         super(BaggingRegressorChromosome, self).__init__(
             BaggingRegressor,
-            self.blueprint_factory(regressor_chromosome, n_estimators),
+            self.genotype_factory(regressor_chromosome, n_estimators),
             OrderedDict({
-                "n_jobs": num_jobs if num_jobs is not None else DEFAULT_NUM_JOBS
+                "n_jobs": num_jobs if num_jobs is not None else DEFAULT_NUM_JOBS,
+                "random_state": rand_int(1, INT32_MAX)
             })
         )
 
-    def blueprint_factory(self, regressor_chromosome=None, n_estimators: int = None, ):
+    def genotype_factory(self, regressor_chromosome=None, n_estimators: int = None, ):
         return OrderedDict({
             "base_estimator": regressor_chromosome if regressor_chromosome is not None else DecisionTreeRegressorChromosome(),
             "n_estimators": RandPoissonChromosome(
@@ -298,12 +261,5 @@ class BaggingRegressorChromosome(ClassChromosome):
                 min_val=0.1,
                 max_val=1.0
             ),
-            "warm_start": RandUniformBooleanChromosome(),
-            "random_state": RandPoissonChromosome(
-                value=rand_int(1, INT32_MAX),
-                min_val=1,
-                max_val=INT32_MAX,
-                rounding=None,
-                output_dtype=int
-            )
+            "warm_start": RandUniformBooleanChromosome()
         })
